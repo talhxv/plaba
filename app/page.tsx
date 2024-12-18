@@ -27,13 +27,32 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('input')
 
-  const handleSubmit = async (e: React.FormEvent) => {de
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // TODO: Replace this with your actual API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setPlainLanguage("This is a simplified version of the abstract. In this study, researchers found new ways to help the immune system fight skin cancer. They tested this on 100 people and found that 40% more people were alive after 5 years compared to older treatments. This is good news because it means we're getting better at treating a difficult type of cancer.")
-    setIsLoading(false)
+    setPlainLanguage('') // Clear previous result
+
+    try {
+      const response = await fetch('http://localhost:8000/simplify/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ abstract: abstract })
+      })
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      const data = await response.json()
+      setPlainLanguage(data.simplified_abstract)
+    } catch (error) {
+      console.error('Error:', error)
+      setPlainLanguage('Sorry, there was an error simplifying the abstract.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
